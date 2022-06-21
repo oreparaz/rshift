@@ -1,0 +1,27 @@
+name: release
+
+on:
+  push:
+    branches:    
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Build
+        run: make build-linux 
+      # see https://github.com/softprops/action-gh-release/issues/20#issuecomment-985988391
+      - name: Generate release tag
+        id: tag
+        run: |
+          echo "::set-output name=release_tag::master_$(date +"%Y-%m-%d_%H-%M")"
+      # see https://github.com/softprops/action-gh-release
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.release_tag }}
+          files: |
+            rshift
