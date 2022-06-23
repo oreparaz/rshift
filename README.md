@@ -42,6 +42,13 @@ If you don't want to keep your own server at home, I found Google Compute Platfo
 You can run this on a micro instance that qualifies for the free forever tier.
 You pay for _egress_ traffic (_ingress_ is for free), so you just pay for what you listen.
 
+__No authentication?__
+
+You can set the following environment variables to turn basic HTTP auth on:
+```
+RSHIFT_USERNAME=foo RSHIFT_PASSWORD=bar ./rshift ...
+```
+
 ## Status
 
 This is "code complete" for my (very) specific use case.

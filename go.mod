@@ -3,6 +3,7 @@ module rshift
 go 1.14
 
 require (
+	github.com/goji/httpauth v0.0.0-20160601135302-2da839ab0f4d
 	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/grafov/m3u8 v0.11.1
