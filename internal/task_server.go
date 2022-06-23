@@ -4,10 +4,12 @@ import (
 	"compress/gzip"
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
+	"github.com/goji/httpauth"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"strconv"
 	"strings"
@@ -75,5 +77,13 @@ func MainServer() {
 	r.PathPrefix("/timeshift/").Handler(
 		http.StripPrefix("/timeshift/",
 			http.FileServer(http.Dir(path.Join(OutPath, path.Join("ts/", urlDirectory))))))
-	http.ListenAndServe(":8080", gzipHandler(handlers.CORS(corsObj)(r)))
+
+	handler := gzipHandler(handlers.CORS(corsObj)(r))
+	if os.Getenv("RSHIFT_USERNAME") != "" {
+		auth := httpauth.SimpleBasicAuth(os.Getenv("RSHIFT_USERNAME"), os.Getenv("RSHIFT_PASSWORD"))
+		handler = auth(handler)
+	} else {
+		log.Println("warning: proceeding without any authentication")
+	}
+	http.ListenAndServe(":8080", handler)
 }
