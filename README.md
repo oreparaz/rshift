@@ -1,5 +1,9 @@
 # Time-shifted HLS streaming
 
+
+https://github.com/oreparaz/rshift
+
+
 Those living in California know that listening to the BBC Radio 4 live stream isn't the same thing ---
 when you're waking up, people in London are already eating supper.
 Fine disc jockeys won't play same music at 8am or 8pm; time zones messes this up.
@@ -18,7 +22,7 @@ with a large disk will work, or any small cloud VM instance will work fine too.
 
 Example usage:
 ```
-curl -O https://github.com/oreparaz/rshift/releases/latest/download/rshift
+curl -LO https://github.com/oreparaz/rshift/releases/latest/download/rshift
 ./rshift -download-m3u8-url https://radio/playlist.m3u8 -output-path=/path/to 
 ```
 
@@ -45,14 +49,3 @@ This is "code complete" for my (very) specific use case.
 Feature-wise it's pretty barebones.
 There is a tons of items in the TODO if you want to tackle on those.
 
-## TODO
-
-- [ ] Some kind of auth? Currently we've yolo auth.
-- [ ] Print small helper URL: "you can listen now at http://...."
-- [ ] Add a minimal web UI. Controls: fast forward 10 min (skip a song), or ff 60 min (skip a program).
-- [ ] Add support for multiple URLs, possibly read from a configuration file.
-- [ ] Improve file seeking. Add an in-memory cache and store only a few files per directory (this will make it possible to run rshift in FAT filesystems that can only handle few files per directory.)
-- [ ] Save disk space: do not cache during downtime hours (night).
-- [ ] Self update https://github.com/rhysd/go-github-selfupdate
-- [ ] Make the stream seekable with event playlist: https://developer.apple.com/documentation/http_live_streaming/example_playlists_for_http_live_streaming/event_playlist_construction
-- [ ] TLS? why would you want that though
