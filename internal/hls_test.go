@@ -30,16 +30,20 @@ func setupMockHttp() {
 #EXTINF:5.013
 ./GL0/34_2021_12_29_01_32_03.ts
 #EXTINF:4.992
-./GL0/34_2021_12_29_01_32_08.ts`,
+./GL0/34_2021_12_29_01_32_08.ts
+#EXTINF:4.992
+http://otherhost.com/path/to/segment.ts`,
 		))
 
-	httpmock.RegisterResponder("GET", `http://example.com/./GL0/34_2021_12_29_01_31_53.ts`,
+	httpmock.RegisterResponder("GET", `http://example.com/GL0/34_2021_12_29_01_31_53.ts`,
 		httpmock.NewStringResponder(200, `some segment body`))
-	httpmock.RegisterResponder("GET", `http://example.com/./GL0/34_2021_12_29_01_31_58.ts`,
+	httpmock.RegisterResponder("GET", `http://example.com/GL0/34_2021_12_29_01_31_58.ts`,
 		httpmock.NewStringResponder(200, `some segment body`))
-	httpmock.RegisterResponder("GET", `http://example.com/./GL0/34_2021_12_29_01_32_03.ts`,
+	httpmock.RegisterResponder("GET", `http://example.com/GL0/34_2021_12_29_01_32_03.ts`,
 		httpmock.NewStringResponder(200, `some segment body`))
-	httpmock.RegisterResponder("GET", `http://example.com/./GL0/34_2021_12_29_01_32_08.ts`,
+	httpmock.RegisterResponder("GET", `http://example.com/GL0/34_2021_12_29_01_32_08.ts`,
+		httpmock.NewStringResponder(200, `some segment body`))
+	httpmock.RegisterResponder("GET", `http://otherhost.com/path/to/segment.ts`,
 		httpmock.NewStringResponder(200, `some segment body`))
 }
 
@@ -59,11 +63,12 @@ var _ = Describe("Parsing a simple M3U file", func() {
 	})
 
 	It("should extract segment URLs", func() {
-		Expect(h.segmentUrls[4421244]).To(Equal("http://example.com/./GL0/34_2021_12_29_01_31_53.ts"))
-		Expect(h.segmentUrls[4421245]).To(Equal("http://example.com/./GL0/34_2021_12_29_01_31_58.ts"))
-		Expect(h.segmentUrls[4421246]).To(Equal("http://example.com/./GL0/34_2021_12_29_01_32_03.ts"))
-		Expect(h.segmentUrls[4421247]).To(Equal("http://example.com/./GL0/34_2021_12_29_01_32_08.ts"))
-		Expect(len(h.segmentUrls)).To(Equal(4))
+		Expect(h.segmentUrls[4421244]).To(Equal("http://example.com/GL0/34_2021_12_29_01_31_53.ts"))
+		Expect(h.segmentUrls[4421245]).To(Equal("http://example.com/GL0/34_2021_12_29_01_31_58.ts"))
+		Expect(h.segmentUrls[4421246]).To(Equal("http://example.com/GL0/34_2021_12_29_01_32_03.ts"))
+		Expect(h.segmentUrls[4421247]).To(Equal("http://example.com/GL0/34_2021_12_29_01_32_08.ts"))
+		Expect(h.segmentUrls[4421248]).To(Equal("http://otherhost.com/path/to/segment.ts")) // absolute
+		Expect(len(h.segmentUrls)).To(Equal(5))
 	})
 
 	It("should download each segment URL", func() {
@@ -71,11 +76,12 @@ var _ = Describe("Parsing a simple M3U file", func() {
 		h.fetchAndSaveSegments(&fs)
 
 		httpCalls := httpmock.GetCallCountInfo()
-		Expect(httpCalls["GET http://example.com/./GL0/34_2021_12_29_01_31_53.ts"]).To(Equal(1))
-		Expect(httpCalls["GET http://example.com/./GL0/34_2021_12_29_01_31_58.ts"]).To(Equal(1))
-		Expect(httpCalls["GET http://example.com/./GL0/34_2021_12_29_01_32_03.ts"]).To(Equal(1))
-		Expect(httpCalls["GET http://example.com/./GL0/34_2021_12_29_01_32_08.ts"]).To(Equal(1))
-		Expect(len(httpCalls)).To(Equal(5))
+		Expect(httpCalls["GET http://example.com/GL0/34_2021_12_29_01_31_53.ts"]).To(Equal(1))
+		Expect(httpCalls["GET http://example.com/GL0/34_2021_12_29_01_31_58.ts"]).To(Equal(1))
+		Expect(httpCalls["GET http://example.com/GL0/34_2021_12_29_01_32_03.ts"]).To(Equal(1))
+		Expect(httpCalls["GET http://example.com/GL0/34_2021_12_29_01_32_08.ts"]).To(Equal(1))
+		Expect(httpCalls["GET http://otherhost.com/path/to/segment.ts"]).To(Equal(1))
+		Expect(len(httpCalls)).To(Equal(6))
 	})
 
 	It("should download everything", func() {
@@ -83,10 +89,11 @@ var _ = Describe("Parsing a simple M3U file", func() {
 		h.fetchAndSaveAll(&fs)
 
 		httpCalls := httpmock.GetCallCountInfo()
-		Expect(httpCalls["GET http://example.com/./GL0/34_2021_12_29_01_31_53.ts"]).To(Equal(1))
-		Expect(httpCalls["GET http://example.com/./GL0/34_2021_12_29_01_31_58.ts"]).To(Equal(1))
-		Expect(httpCalls["GET http://example.com/./GL0/34_2021_12_29_01_32_03.ts"]).To(Equal(1))
-		Expect(httpCalls["GET http://example.com/./GL0/34_2021_12_29_01_32_08.ts"]).To(Equal(1))
-		Expect(len(httpCalls)).To(Equal(5))
+		Expect(httpCalls["GET http://example.com/GL0/34_2021_12_29_01_31_53.ts"]).To(Equal(1))
+		Expect(httpCalls["GET http://example.com/GL0/34_2021_12_29_01_31_58.ts"]).To(Equal(1))
+		Expect(httpCalls["GET http://example.com/GL0/34_2021_12_29_01_32_03.ts"]).To(Equal(1))
+		Expect(httpCalls["GET http://example.com/GL0/34_2021_12_29_01_32_08.ts"]).To(Equal(1))
+		Expect(httpCalls["GET http://otherhost.com/path/to/segment.ts"]).To(Equal(1))
+		Expect(len(httpCalls)).To(Equal(6))
 	})
 })

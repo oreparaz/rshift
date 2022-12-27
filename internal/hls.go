@@ -2,10 +2,11 @@ package internal
 
 import (
 	"bytes"
+	"net/url"
+	"time"
+
 	"github.com/grafov/m3u8"
 	"github.com/pkg/errors"
-	"strings"
-	"time"
 )
 
 type Hls struct {
@@ -51,18 +52,20 @@ func (h *Hls) parseSegments() error {
 
 	segmentCounter := 0
 	for i := startAt; playlistHasMoreItems(i); i++ {
-		segmentUrl := ""
-		relativePath := h.Mp.Segments[i].URI
-
-		if comps := strings.Split(h.playlistUrl, "/"); len(comps) > 0 {
-			suffix := comps[len(comps)-1]
-			baseUrl := strings.TrimSuffix(h.playlistUrl, suffix)
-			segmentUrl = baseUrl + relativePath
-		} else {
-			segmentUrl = relativePath
+		segmentUrl, err := url.Parse(h.Mp.Segments[i].URI)
+		if err != nil {
+			return errors.Wrapf(err, "Parse segment URL")
 		}
 
-		segmentUrls[int(h.Mp.SeqNo)+segmentCounter] = segmentUrl
+		if !segmentUrl.IsAbs() {
+			base, err := url.Parse(h.playlistUrl)
+			if err != nil {
+				return errors.Wrapf(err, "Parse base URL")
+			}
+			segmentUrl = base.ResolveReference(segmentUrl)
+		}
+
+		segmentUrls[int(h.Mp.SeqNo)+segmentCounter] = segmentUrl.String()
 		segmentCounter++
 	}
 
